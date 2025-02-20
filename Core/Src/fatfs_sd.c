@@ -14,6 +14,7 @@ static volatile DSTATUS Stat = STA_NOINIT;              /* 디스크 상태 Flag
 static uint8_t CardType;                                /* SD 타입 0:MMC, 1:SDC, 2:Block addressing */
 static uint8_t PowerFlag = 0;                           /* Power 상태 Flag */
 
+
 /* SPI Chip Select */
 static void SELECT(void)
 {

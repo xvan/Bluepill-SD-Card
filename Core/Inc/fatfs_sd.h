@@ -24,6 +24,11 @@ DRESULT SD_disk_read (BYTE pdrv, BYTE* buff, DWORD sector, UINT count);
 DRESULT SD_disk_write (BYTE pdrv, const BYTE* buff, DWORD sector, UINT count);
 DRESULT SD_disk_ioctl (BYTE pdrv, BYTE cmd, void* buff);
 
+#define SD_CS_GPIO_Port  GPIOA
+#define SD_CS_Pin GPIO_PIN_4
+
+
+
 #define SPI_TIMEOUT 1000
 
 #endif

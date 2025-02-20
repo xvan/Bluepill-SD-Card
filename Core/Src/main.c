@@ -44,7 +44,9 @@
 SPI_HandleTypeDef hspi1;
 
 /* USER CODE BEGIN PV */
-
+FATFS fs;
+FIL fil;
+volatile uint8_t Timer1, Timer2;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -92,6 +94,12 @@ int main(void)
   MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
 
+  HAL_Delay(500);
+  f_mount(&fs, "", 0);
+  f_open(&fil, "test.txt", FA_OPEN_ALWAYS | FA_WRITE | FA_READ);
+  f_lseek(&fil, fil.fsize);
+  f_puts("This is an example text to check SD Card Module with STM32 Blue Pill\n", &fil);
+  f_close(&fil);
   /* USER CODE END 2 */
 
   /* Infinite loop */

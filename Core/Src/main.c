@@ -55,6 +55,7 @@ static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
 /* USER CODE BEGIN PFP */
 
+void toggle_led(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -95,11 +96,16 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   HAL_Delay(500);
-  f_mount(&fs, "", 0);
-  f_open(&fil, "test.txt", FA_OPEN_ALWAYS | FA_WRITE | FA_READ);
-  f_lseek(&fil, fil.fsize);
+  if (f_mount(&fs, "", 0) != FR_OK)
+		Error_Handler();
+  HAL_Delay(500);
+  if ( f_open(&fil, "test.txt", FA_OPEN_ALWAYS | FA_WRITE | FA_READ) != FR_OK ) Error_Handler();
+  HAL_Delay(500);
+  if (f_lseek(&fil, fil.fsize) != FR_OK) Error_Handler();
+  HAL_Delay(500);
   f_puts("This is an example text to check SD Card Module with STM32 Blue Pill\n", &fil);
-  f_close(&fil);
+  HAL_Delay(500);
+  if (f_close(&fil) != FR_OK ) Error_Handler();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -107,7 +113,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -199,10 +205,21 @@ static void MX_GPIO_Init(void)
 /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : PC13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PA4 */
   GPIO_InitStruct.Pin = GPIO_PIN_4;
@@ -216,7 +233,9 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void toggle_led(void){
+	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+}
 /* USER CODE END 4 */
 
 /**
@@ -227,9 +246,11 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
+  //__disable_irq();
   while (1)
   {
+	  HAL_Delay(500);
+	  toggle_led();
   }
   /* USER CODE END Error_Handler_Debug */
 }

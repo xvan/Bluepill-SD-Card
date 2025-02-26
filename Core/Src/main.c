@@ -19,6 +19,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "fatfs.h"
+#include "morse.h"
+#include <stdio.h>
+#include <stdbool.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -53,6 +56,8 @@ volatile uint8_t Timer1, Timer2;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
+//bool check_f_result(int id, FRESULT result);
+
 /* USER CODE BEGIN PFP */
 
 void toggle_led(void);
@@ -75,6 +80,7 @@ int main(void)
 
   /* MCU Configuration--------------------------------------------------------*/
 
+HEAVEN:
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
@@ -95,17 +101,33 @@ int main(void)
   MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
 
-  HAL_Delay(500);
-  if (f_mount(&fs, "", 0) != FR_OK)
-		Error_Handler();
-  HAL_Delay(500);
-  if ( f_open(&fil, "test.txt", FA_OPEN_ALWAYS | FA_WRITE | FA_READ) != FR_OK ) Error_Handler();
-  HAL_Delay(500);
-  if (f_lseek(&fil, fil.fsize) != FR_OK) Error_Handler();
-  HAL_Delay(500);
+  //while(lock)
+  for(int i=0; i < 10; i++)
+  {
+	  HAL_Delay(100);
+	  EARTH:
+	  toggle_led();
+  }
+
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
+
+
+  f_mount(&fs, "", 1);
+  if ( f_open(&fil, "test.txt", FA_OPEN_ALWAYS | FA_WRITE | FA_READ) != FR_OK){
+	  if (! __HAL_RCC_GET_FLAG(RCC_FLAG_SFTRST)){
+		  HAL_NVIC_SystemReset();
+	  }
+
+	  Error_Handler();
+  }
+
+  __HAL_RCC_CLEAR_RESET_FLAGS();
+
+  f_lseek(&fil, fil.fsize);
   f_puts("This is an example text to check SD Card Module with STM32 Blue Pill\n", &fil);
-  HAL_Delay(500);
-  if (f_close(&fil) != FR_OK ) Error_Handler();
+  f_close(&fil);
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -116,8 +138,22 @@ int main(void)
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
     /* USER CODE BEGIN 3 */
   }
+
+  HELL:
+  	  HAL_NVIC_SystemReset();
+   	  while(1) morseCodeInterpreter("SOS ");
+
+  	  //goto HEAVEN;
   /* USER CODE END 3 */
 }
+//
+//bool check_f_result(int id, FRESULT result){
+//	char buffer[20] = "";
+//	if (result == FR_OK) return true;
+//	sprintf(buffer, "%i %i    ", id, result);
+//	morseCodeInterpreter(buffer);
+//	return false;
+//}
 
 /**
   * @brief System Clock Configuration
@@ -246,12 +282,8 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-  //__disable_irq();
-  while (1)
-  {
-	  HAL_Delay(500);
-	  toggle_led();
-  }
+  /* __disable_irq(); */
+  while(1) morseCodeInterpreter("SOS ");
   /* USER CODE END Error_Handler_Debug */
 }
 
